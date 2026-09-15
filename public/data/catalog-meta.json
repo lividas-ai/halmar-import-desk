@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "verifiedAt": "2026-09-15T19:45:37.108Z",
-  "bundleSha256": "28773980ed09dd70e2c65e194304db2bcf643f37f5c57eebbe711046cd2a76b7",
+  "verifiedAt": "2026-09-15T20:02:09.319Z",
+  "bundleSha256": "b2a207adf1f136d79dc9b73246777a15a590582050c41041d1a2c977d2ba5c3a",
   "fingerprintAlgorithm": "SHA-256 of the exact UTF-8 public/data/products.json bytes",
   "uniqueProducts": 3367,
   "duplicateCatalogRowsMerged": 11,
@@ -40,12 +40,12 @@
     {
       "role": "stock",
       "url": "https://integration.halmar.pl/halmar_stock.xml",
-      "contentSha256": "865da57202b9df4e0f68986d97d3ca2456e3f6f094c8013c240ad4338e9048e1",
-      "rawSha256": "4e03e99832f1041c82f94e10c320cb42e067b22a72806bfaef33f569919b7db3",
+      "contentSha256": "22771f249507c70159cd1922a4db87a216e9ae479c5dd0cca4082d9f0d92f3f0",
+      "rawSha256": "8b2c8084099666ec2060e39159d93910b35aa0520191332328217b5833fd157d",
       "contentHashAlgorithm": "SHA-256 of UTF-8 decoded XML after removing the root <Items> Date attribute",
       "itemRows": 3318,
       "uniqueGtin": 3318,
-      "feedDate": "2026-09-15T21:40:00.767"
+      "feedDate": "2026-09-15T22:00:01.067"
     },
     {
       "role": "prices",

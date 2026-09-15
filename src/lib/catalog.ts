@@ -1,3 +1,5 @@
+import { CATALOG_FINGERPRINT } from "./catalog-integrity";
+
 export type StockStatus = "in_stock" | "low_stock" | "out_of_stock" | "not_listed";
 
 export type Product = {
@@ -35,7 +37,7 @@ export type CategoryMeta = {
 
 export const PAGE_SIZE = 9;
 export const TOTAL_PRODUCTS = 3367;
-export const CATALOG_VERSION = "28773980ed09dd70";
+export const CATALOG_VERSION = CATALOG_FINGERPRINT.slice(0, 16);
 
 const STOCK_RANK: Record<StockStatus, number> = {
   in_stock: 0,
