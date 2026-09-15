@@ -142,6 +142,8 @@ export const useDesk = create<DeskState>((set, get) => ({
       "collection",
       "stock",
       "deliveryDate",
+      "pricePln",
+      "priceEur",
       "image",
       "description",
     ];
@@ -159,6 +161,8 @@ export const useDesk = create<DeskState>((set, get) => ({
           p.collection,
           p.stockLabel,
           p.deliveryDate,
+          p.pricePln ?? "",
+          p.priceEur ?? "",
           p.images[0] ?? "",
           p.description.replace(/\s+/g, " "),
         ]

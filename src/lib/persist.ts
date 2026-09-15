@@ -231,6 +231,9 @@ export function buildExportPayload(
     deliveryDate: string;
     images: string[];
     description: string;
+    pricePln?: string;
+    priceEur?: string;
+    priceListed?: boolean;
   }>,
 ) {
   const toImport: Array<Record<string, string>> = [];
@@ -255,6 +258,9 @@ export function buildExportPayload(
       stock: p.stockLabel,
       stockStatus: p.stockStatus,
       deliveryDate: p.deliveryDate,
+      pricePln: p.pricePln || "",
+      priceEur: p.priceEur || "",
+      priceListed: p.priceListed ? "yes" : "no",
       decision,
       image: p.images[0] ?? "",
     };
@@ -288,6 +294,7 @@ export function buildExportPayload(
     xmlSources: {
       catalogEnglish: "https://integration.halmar.pl/halmar_catalog_en.xml",
       catalogPolish: "https://integration.halmar.pl/halmar_catalog_pl.xml",
+      catalogExportPrices: "https://integration.halmar.pl/halmar_catalog_export.xml",
       stock: "https://integration.halmar.pl/halmar_stock.xml",
     },
     howToUseWithXml: [
@@ -300,6 +307,7 @@ export function buildExportPayload(
       "Do NOT put on the website items whose decision is the exact string \"reject\". Also listed in toSkip.",
       "\"unmarked\" means the client has not decided — do not import those unless told otherwise.",
       "Use XML for all product content. Use this file only to filter which SKUs to keep.",
+      "Prices: pricePln is XML <price1> (PLN), priceEur is XML <price2> (EUR) from halmar_catalog_export.xml, joined on ean_GTIN. 14 SKUs are not in the price file — priceListed is no.",
       "All 3367 unique catalog products are listed in products[]. counts.totalProducts must equal that list length.",
     ],
     decisionValues: {

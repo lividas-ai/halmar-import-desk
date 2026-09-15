@@ -130,6 +130,27 @@ export function ProductCard({
             ? `Out of stock · expected back ${product.deliveryDate}`
             : product.stockLabel}
         </p>
+        <p className="text-sm font-semibold tabular-nums text-fg">
+          {product.priceListed && (product.pricePln || product.priceEur) ? (
+            <>
+              {product.pricePln ? (
+                <span>
+                  {product.pricePln} {product.pricePlnCurrency || "PLN"}
+                </span>
+              ) : null}
+              {product.pricePln && product.priceEur ? (
+                <span className="mx-1.5 text-muted font-normal">·</span>
+              ) : null}
+              {product.priceEur ? (
+                <span className="text-muted font-medium">
+                  {product.priceEur} {product.priceEurCurrency || "EUR"}
+                </span>
+              ) : null}
+            </>
+          ) : (
+            <span className="font-medium text-muted">Price not listed in export file</span>
+          )}
+        </p>
         <dl className="grid grid-cols-2 gap-x-2 text-[11px] text-muted">
           <div>
             <dt className="uppercase tracking-wide">EAN</dt>

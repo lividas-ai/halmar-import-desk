@@ -14,6 +14,11 @@ export type Product = {
   hasCatalogPhoto: boolean;
   price: string;
   currency: string;
+  pricePln: string;
+  priceEur: string;
+  pricePlnCurrency: string;
+  priceEurCurrency: string;
+  priceListed: boolean;
   weight: string;
   origin: string;
   withdrawn: string;
@@ -30,7 +35,7 @@ export type CategoryMeta = {
 
 export const PAGE_SIZE = 9;
 export const TOTAL_PRODUCTS = 3367;
-export const CATALOG_VERSION = "en-stock-3";
+export const CATALOG_VERSION = "en-stock-price-1";
 
 const STOCK_RANK: Record<StockStatus, number> = {
   in_stock: 0,
@@ -66,6 +71,11 @@ export function loadProducts(): Promise<Product[]> {
           ...p,
           eanGtin: p.eanGtin || p.ean,
           eanInternal: p.eanInternal || "",
+          pricePln: p.pricePln || p.price || "",
+          priceEur: p.priceEur || "",
+          pricePlnCurrency: p.pricePlnCurrency || "PLN",
+          priceEurCurrency: p.priceEurCurrency || "EUR",
+          priceListed: p.priceListed ?? Boolean(p.pricePln || p.price),
         })),
       );
       return productCache;

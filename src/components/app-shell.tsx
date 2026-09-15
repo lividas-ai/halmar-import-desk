@@ -82,12 +82,17 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-bg text-fg">
       <header className="sticky top-0 z-40 border-b border-border bg-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
-          <Link to="/" className="font-display text-lg tracking-tight">
+          <Link
+            to="/work"
+            search={{ category: "all", page: 1, q: "" }}
+            className="font-display text-lg tracking-tight"
+          >
             Halmar Import Desk
           </Link>
           <nav className="flex items-center gap-1 text-sm">
             <Link
-              to="/"
+              to="/work"
+              search={{ category: "all", page: 1, q: "" }}
               className="rounded-md px-3 py-2 text-muted hover:bg-bg hover:text-fg"
             >
               <span className="inline-flex items-center gap-1">
