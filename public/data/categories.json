@@ -1,0 +1,142 @@
+[
+  {
+    "id": "Chairs",
+    "name": "Chairs",
+    "count": 924
+  },
+  {
+    "id": "Kitchens",
+    "name": "Kitchens",
+    "count": 446
+  },
+  {
+    "id": "Tables",
+    "name": "Tables",
+    "count": 319
+  },
+  {
+    "id": "Coffee tables",
+    "name": "Coffee tables",
+    "count": 257
+  },
+  {
+    "id": "Armchairs",
+    "name": "Armchairs",
+    "count": 220
+  },
+  {
+    "id": "TV cabinets",
+    "name": "TV cabinets",
+    "count": 160
+  },
+  {
+    "id": "Chests of drawers",
+    "name": "Chests of drawers",
+    "count": 153
+  },
+  {
+    "id": "Mattresses",
+    "name": "Mattresses",
+    "count": 113
+  },
+  {
+    "id": "Bar stools",
+    "name": "Bar stools",
+    "count": 84
+  },
+  {
+    "id": "Bookcases and shelves",
+    "name": "Bookcases and shelves",
+    "count": 84
+  },
+  {
+    "id": "Wardrobes",
+    "name": "Wardrobes",
+    "count": 81
+  },
+  {
+    "id": "Hallway",
+    "name": "Hallway",
+    "count": 72
+  },
+  {
+    "id": "Beds",
+    "name": "Beds",
+    "count": 58
+  },
+  {
+    "id": "Desks",
+    "name": "Desks",
+    "count": 53
+  },
+  {
+    "id": "Lighting",
+    "name": "Lighting",
+    "count": 51
+  },
+  {
+    "id": "Accessories",
+    "name": "Accessories",
+    "count": 50
+  },
+  {
+    "id": "Other",
+    "name": "Other",
+    "count": 46
+  },
+  {
+    "id": "Pouffes",
+    "name": "Pouffes",
+    "count": 32
+  },
+  {
+    "id": "Mirrors",
+    "name": "Mirrors",
+    "count": 31
+  },
+  {
+    "id": "Sofas and corners",
+    "name": "Sofas and corners",
+    "count": 29
+  },
+  {
+    "id": "Bedside tables",
+    "name": "Bedside tables",
+    "count": 24
+  },
+  {
+    "id": "Display cabinets",
+    "name": "Display cabinets",
+    "count": 22
+  },
+  {
+    "id": "Sets",
+    "name": "Sets",
+    "count": 21
+  },
+  {
+    "id": "Benches",
+    "name": "Benches",
+    "count": 16
+  },
+  {
+    "id": "Dressing tables",
+    "name": "Dressing tables",
+    "count": 16
+  },
+  {
+    "id": "Bathrooms",
+    "name": "Bathrooms",
+    "count": 2
+  },
+  {
+    "id": "Fireplaces",
+    "name": "Fireplaces",
+    "count": 2
+  },
+  {
+    "id": "Loungers",
+    "name": "Loungers",
+    "count": 1
+  }
+]

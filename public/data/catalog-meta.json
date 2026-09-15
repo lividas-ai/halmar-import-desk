@@ -1,0 +1,16 @@
+{
+  "source": "https://integration.halmar.pl/halmar_catalog_en.xml",
+  "stockSource": "https://integration.halmar.pl/halmar_stock.xml",
+  "xmlItemRows": 3378,
+  "uniqueProducts": 3367,
+  "duplicateRowsMerged": 11,
+  "stockFileItems": 3318,
+  "allHaveImageUrls": true,
+  "stock": {
+    "out_of_stock": 1096,
+    "low_stock": 1012,
+    "in_stock": 1210,
+    "not_listed": 49
+  },
+  "note": "Every product in the English XML is included (duplicate category-header rows merged by EAN). Photo URLs come from the catalog; some Halmar image files return 404 on their server."
+}
