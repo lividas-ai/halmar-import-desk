@@ -26,7 +26,7 @@ async function waitForDesk(page) {
 
 async function openDesk(context, token, query = "") {
   const page = await context.newPage();
-  await page.goto(deskUrl(token, query));
+  await page.goto(deskUrl(token, query), { waitUntil: "domcontentloaded", timeout: 60_000 });
   await waitForDesk(page);
   if (query) {
     await page.locator("article").first().waitFor({ timeout: 30_000 });
@@ -79,7 +79,7 @@ try {
   listenForErrors(page);
   const nextDownloads = [];
   page.on("download", (download) => nextDownloads.push(download.suggestedFilename()));
-  await page.goto(deskUrl(""));
+  await page.goto(deskUrl(""), { waitUntil: "domcontentloaded", timeout: 60_000 });
   await page.locator("article").first().waitFor({ timeout: 30_000 });
   await waitForDesk(page);
 
@@ -137,10 +137,10 @@ try {
   const unionPage = await openDesk(unionContext, token);
   listenForErrors(unionPage);
   assert.equal(await markedCount(unionPage), 11, "competing devices must merge independent marks");
-  await unionPage.goto(deskUrl(token, leftProduct.id));
+  await unionPage.goto(deskUrl(token, leftProduct.id), { waitUntil: "domcontentloaded", timeout: 60_000 });
   await waitForDesk(unionPage);
   assert.equal(await unionPage.locator("article").getByRole("button", { name: "1 Import" }).getAttribute("aria-pressed"), "true");
-  await unionPage.goto(deskUrl(token, rightProduct.id));
+  await unionPage.goto(deskUrl(token, rightProduct.id), { waitUntil: "domcontentloaded", timeout: 60_000 });
   await waitForDesk(unionPage);
   assert.equal(await unionPage.locator("article").getByRole("button", { name: "2 Skip" }).getAttribute("aria-pressed"), "true");
 
@@ -233,8 +233,22 @@ try {
   );
   await finalPage.locator('input[type="file"]').setInputFiles(restorePath);
   await finalPage.waitForFunction(() => (document.querySelector("header")?.textContent ?? "").includes("3367/3367 marked"), null, { timeout: 30_000 });
-  await finalPage.getByRole("link", { name: "Chosen" }).click();
-  await finalPage.waitForURL(/\/review/, { timeout: 30_000 });
+  const chosenLink = finalPage.getByRole("link", { name: "Chosen" });
+  try {
+    await Promise.all([
+      finalPage.waitForURL(/\/review/, { timeout: 60_000 }),
+      chosenLink.click(),
+    ]);
+  } catch (error) {
+    console.error(JSON.stringify({
+      chosenNavigationTimeout: true,
+      currentUrl: finalPage.url(),
+      chosenHref: await chosenLink.getAttribute("href").catch(() => null),
+      header: await finalPage.locator("header").innerText().catch(() => "unavailable"),
+      browserErrors: consoleErrors,
+    }, null, 2));
+    throw error;
+  }
   const finalDownloadPromise = finalPage.waitForEvent("download", { timeout: 60_000 });
   await finalPage.getByRole("button", { name: "Finalize & download JSON" }).click();
   const finalDownload = await finalDownloadPromise;
