@@ -30,7 +30,8 @@ type DeskState = DeskSnapshot & {
   setNote: (note: string) => void;
   connectBackupFile: () => Promise<{ ok: true; name: string } | { ok: false; error: string }>;
   importSnapshot: (raw: unknown) => { ok: true; count: number } | { ok: false; error: string };
-  exportDecisions: (products: Product[], kind?: "manual" | "auto") => void;
+  exportDecisions: (products: Product[], kind?: "manual" | "auto" | "page") => void;
+  checkpointPage: (products: Product[]) => void;
   exportCsv: (products: Product[], which: "import" | "reject" | "all") => void;
 };
 
@@ -115,14 +116,24 @@ export const useDesk = create<DeskState>((set, get) => ({
     return { ok: true, count: Object.keys(parsed.decisions).length };
   },
   exportDecisions: (products, kind = "manual") => {
-    const snap = get();
+    const snap = persistNow({}, get());
+    set({ ...snap, hydrated: true });
     const payload = buildExportPayload(snap, products);
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
     const name =
-      kind === "auto"
-        ? `halmar-autosave-${stamp}.json`
-        : `halmar-decisions-${stamp}.json`;
+      kind === "page"
+        ? "halmar-import-desk-SAVE.json"
+        : kind === "auto"
+          ? `halmar-autosave-${stamp}.json`
+          : `halmar-decisions-${stamp}.json`;
     downloadJson(name, payload);
+    set({ lastAutoDownloadAt: Date.now() });
+  },
+  checkpointPage: (products) => {
+    const snap = persistNow({}, get());
+    set({ ...snap, hydrated: true });
+    const payload = buildExportPayload(snap, products);
+    downloadJson("halmar-import-desk-SAVE.json", payload);
     set({ lastAutoDownloadAt: Date.now() });
   },
   exportCsv: (products, which) => {

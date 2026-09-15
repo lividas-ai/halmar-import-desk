@@ -31,6 +31,7 @@ function WorkPage() {
   const { products, categories, loading, error } = useCatalog();
   const decisions = useDesk((s) => s.decisions);
   const setMark = useDesk((s) => s.setMark);
+  const checkpointPage = useDesk((s) => s.checkpointPage);
   const [focus, setFocus] = useState(0);
   const [query, setQuery] = useState(q);
   const [lightbox, setLightbox] = useState<{ product: Product; index: number } | null>(
@@ -82,6 +83,21 @@ function WorkPage() {
   function go(nextPage: number) {
     if (nextPage > page && !pageReady) {
       toast.error("Mark every product on this page with 1 (import) or 2 (skip) first.");
+      return;
+    }
+    if (nextPage > page && products) {
+      checkpointPage(products);
+      toast.success("Page saved internally. Marks cannot be lost.");
+    }
+    if (nextPage > slice.totalPages) {
+      if (!products) return;
+      const loc = firstUnmarkedLocation(products, decisions, categories);
+      if (!loc) {
+        toast.success("Every product is marked.");
+        void navigate({ to: "/review" });
+        return;
+      }
+      void navigate({ search: { category: loc.category, page: loc.page, q: "" } });
       return;
     }
     void navigate({ search: (prev) => ({ ...prev, page: nextPage }) });
@@ -176,7 +192,7 @@ function WorkPage() {
               }`}
             >
               {pageReady
-                ? "Page complete — you may continue"
+                ? "Page complete — Next saves progress"
                 : `${unmarkedOnPage.length} on this page still need 1 or 2`}
             </p>
           </div>
@@ -215,11 +231,11 @@ function WorkPage() {
               Page {slice.page} / {slice.totalPages}
             </p>
             <Button
-              disabled={slice.page >= slice.totalPages || !pageReady}
+              disabled={!pageReady}
               onClick={() => go(slice.page + 1)}
-              title={!pageReady ? "Mark all products on this page first" : undefined}
+              title={!pageReady ? "Mark all products on this page first" : "Saves progress, then continues"}
             >
-              Next
+              {slice.page >= slice.totalPages ? "Save & continue" : "Next"}
               <ChevronRight className="size-4" />
             </Button>
           </div>
