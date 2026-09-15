@@ -57,7 +57,7 @@ export function ProductCard({
             <img
               src={src}
               alt={product.name}
-              className="h-44 w-full object-contain bg-bg"
+              className="h-60 w-full object-contain bg-bg"
               loading="lazy"
               onError={() => {
                 if (src) setFailed((f) => ({ ...f, [src]: true }));
@@ -65,7 +65,7 @@ export function ProductCard({
             />
           </button>
         ) : (
-          <div className="flex h-44 items-center justify-center px-3 text-center text-xs text-muted">
+          <div className="flex h-60 items-center justify-center px-3 text-center text-xs text-muted">
             {product.hasCatalogPhoto
               ? "Photo listed in catalog, missing on Halmar server"
               : "No photo in catalog"}
@@ -161,12 +161,6 @@ export function ProductCard({
             <dd className="truncate font-mono text-fg">{product.code || "—"}</dd>
           </div>
         </dl>
-        {product.description ? (
-          <p className="line-clamp-3 whitespace-pre-wrap text-xs leading-relaxed text-fg/90">
-            {product.description}
-          </p>
-        ) : null}
-
         <div className="mt-auto grid grid-cols-2 gap-2 pt-1">
           <Button
             type="button"

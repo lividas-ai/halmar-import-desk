@@ -94,7 +94,7 @@ function ReviewPage() {
         )}
 
         {loading ? <p className="mt-8 text-muted">Loading…</p> : null}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {list.map((p) => (
             <ProductCard
               key={p.id}
