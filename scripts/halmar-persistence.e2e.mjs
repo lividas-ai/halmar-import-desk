@@ -97,7 +97,7 @@ try {
     (document.querySelector("header")?.textContent ?? "").includes("changes pending"),
   );
   await page.getByRole("button", { name: "Next" }).click();
-  await page.waitForURL(/page=2/, { timeout: 30_000 });
+  await page.waitForURL(/page=2/, { waitUntil: "domcontentloaded", timeout: 30_000 });
   await page.waitForFunction(() => {
     const text = document.querySelector("header")?.textContent ?? "";
     return text.includes("cloud r1") && !text.includes("changes pending");
@@ -236,7 +236,7 @@ try {
   const chosenLink = finalPage.getByRole("link", { name: "Chosen" });
   try {
     await Promise.all([
-      finalPage.waitForURL(/\/review/, { timeout: 60_000 }),
+      finalPage.waitForURL(/\/review/, { waitUntil: "domcontentloaded", timeout: 60_000 }),
       chosenLink.click(),
     ]);
   } catch (error) {
