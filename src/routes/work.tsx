@@ -8,7 +8,7 @@ import { ProductCard } from "@/components/product-card";
 import { Lightbox } from "@/components/lightbox";
 import { useCatalog } from "@/hooks/use-catalog";
 import { useDesk } from "@/store/desk-store";
-import { PAGE_SIZE, filterProducts, firstUnmarkedLocation, pageSlice } from "@/lib/catalog";
+import { filterProducts, firstUnmarkedLocation, pageSlice } from "@/lib/catalog";
 import type { Product } from "@/lib/catalog";
 
 type WorkSearch = { category: string; page: number; q: string };
@@ -20,7 +20,12 @@ export const Route = createFileRoute("/work")({
         ? search.category
         : "all",
     page: Math.max(1, Number(search.page) || 1),
-    q: typeof search.q === "string" ? search.q : "",
+    q:
+      typeof search.q === "string"
+        ? search.q
+        : typeof search.q === "number" && Number.isFinite(search.q)
+          ? String(search.q)
+          : "",
   }),
   component: WorkPage,
 });
@@ -30,8 +35,10 @@ function WorkPage() {
   const navigate = useNavigate({ from: "/work" });
   const { products, categories, loading, error } = useCatalog();
   const decisions = useDesk((s) => s.decisions);
+  const deskToken = useDesk((s) => s.deskToken);
   const setMark = useDesk((s) => s.setMark);
   const checkpointPage = useDesk((s) => s.checkpointPage);
+  const checkpointing = useDesk((s) => s.checkpointing);
   const [focus, setFocus] = useState(0);
   const [query, setQuery] = useState(q);
   const [lightbox, setLightbox] = useState<{ product: Product; index: number } | null>(
@@ -44,12 +51,17 @@ function WorkPage() {
   }, [products, category, q]);
 
   const slice = pageSlice(filtered, page);
+  const deskHash = deskToken ? `desk=${deskToken}` : undefined;
 
   useEffect(() => {
     if (slice.page !== page) {
-      void navigate({ search: (prev) => ({ ...prev, page: slice.page }), replace: true });
+      void navigate({
+        search: (prev) => ({ ...prev, page: slice.page }),
+        hash: deskHash,
+        replace: true,
+      });
     }
-  }, [slice.page, page, navigate]);
+  }, [slice.page, page, navigate, deskHash]);
 
   useEffect(() => {
     setFocus(0);
@@ -80,31 +92,38 @@ function WorkPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [slice.items, focus, unmarkedOnPage, setMark, products]);
 
-  function go(nextPage: number) {
+  async function go(nextPage: number) {
     if (nextPage > page && !pageReady) {
       toast.error("Mark every product on this page with 1 (import) or 2 (skip) first.");
       return;
     }
     if (nextPage > page && products) {
-      checkpointPage(products);
-      toast.success("Page saved internally. Marks cannot be lost.");
+      const result = await checkpointPage();
+      if (!result.ok) {
+        toast.error(`Could not confirm the cloud save. You are still on this page. ${result.error}`);
+        return;
+      }
+      toast.success(`Cloud checkpoint confirmed · revision ${result.revision}.`);
     }
     if (nextPage > slice.totalPages) {
       if (!products) return;
       const loc = firstUnmarkedLocation(products, decisions, categories);
       if (!loc) {
         toast.success("Every product is marked.");
-        void navigate({ to: "/review" });
+        void navigate({ to: "/review", hash: deskHash });
         return;
       }
-      void navigate({ search: { category: loc.category, page: loc.page, q: "" } });
+      void navigate({
+        search: { category: loc.category, page: loc.page, q: "" },
+        hash: deskHash,
+      });
       return;
     }
-    void navigate({ search: (prev) => ({ ...prev, page: nextPage }) });
+    void navigate({ search: (prev) => ({ ...prev, page: nextPage }), hash: deskHash });
   }
 
   function jumpCategory(name: string) {
-    void navigate({ search: { category: name, page: 1, q } });
+    void navigate({ search: { category: name, page: 1, q }, hash: deskHash });
   }
 
   function resumeUnmarked() {
@@ -114,7 +133,10 @@ function WorkPage() {
       toast.success("Every product is marked.");
       return;
     }
-    void navigate({ search: { category: loc.category, page: loc.page, q: "" } });
+    void navigate({
+      search: { category: loc.category, page: loc.page, q: "" },
+      hash: deskHash,
+    });
   }
 
   return (
@@ -155,7 +177,10 @@ function WorkPage() {
             className="mb-4 flex flex-wrap items-center gap-2"
             onSubmit={(e) => {
               e.preventDefault();
-              void navigate({ search: (prev) => ({ ...prev, q: query, page: 1 }) });
+              void navigate({
+                search: (prev) => ({ ...prev, q: query, page: 1 }),
+                hash: deskHash,
+              });
             }}
           >
             <label className="relative min-w-56 flex-1">
@@ -222,7 +247,7 @@ function WorkPage() {
             <Button
               variant="secondary"
               disabled={slice.page <= 1}
-              onClick={() => go(slice.page - 1)}
+              onClick={() => void go(slice.page - 1)}
             >
               <ChevronLeft className="size-4" />
               Previous
@@ -231,11 +256,15 @@ function WorkPage() {
               Page {slice.page} / {slice.totalPages}
             </p>
             <Button
-              disabled={!pageReady}
-              onClick={() => go(slice.page + 1)}
+              disabled={!pageReady || checkpointing}
+              onClick={() => void go(slice.page + 1)}
               title={!pageReady ? "Mark all products on this page first" : "Saves progress, then continues"}
             >
-              {slice.page >= slice.totalPages ? "Save & continue" : "Next"}
+              {checkpointing
+                ? "Confirming save…"
+                : slice.page >= slice.totalPages
+                  ? "Save & continue"
+                  : "Next"}
               <ChevronRight className="size-4" />
             </Button>
           </div>

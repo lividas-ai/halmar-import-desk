@@ -15,7 +15,7 @@ export const Route = createRootRoute({
       { name: "theme-color", content: "#2c4a3e" },
       {
         name: "description",
-        content: "Mark every Halmar product to import or skip. Progress is saved on this device.",
+        content: "Mark every Halmar product to import or skip. Progress is verified locally and checkpointed privately in the cloud.",
       },
     ],
     links: [

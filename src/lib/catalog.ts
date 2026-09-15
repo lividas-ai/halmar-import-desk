@@ -35,7 +35,7 @@ export type CategoryMeta = {
 
 export const PAGE_SIZE = 9;
 export const TOTAL_PRODUCTS = 3367;
-export const CATALOG_VERSION = "en-stock-price-1";
+export const CATALOG_VERSION = "28773980ed09dd70";
 
 const STOCK_RANK: Record<StockStatus, number> = {
   in_stock: 0,
@@ -67,16 +67,19 @@ export function loadProducts(): Promise<Product[]> {
     })
     .then((data) => {
       productCache = sortByStock(
-        data.map((p) => ({
-          ...p,
-          eanGtin: p.eanGtin || p.ean,
-          eanInternal: p.eanInternal || "",
-          pricePln: p.pricePln || p.price || "",
-          priceEur: p.priceEur || "",
-          pricePlnCurrency: p.pricePlnCurrency || "PLN",
-          priceEurCurrency: p.priceEurCurrency || "EUR",
-          priceListed: p.priceListed ?? Boolean(p.pricePln || p.price),
-        })),
+        data.map((p) => {
+          const priceListed = p.priceListed ?? Boolean(p.pricePln || p.price);
+          return {
+            ...p,
+            eanGtin: p.eanGtin || p.ean,
+            eanInternal: p.eanInternal || "",
+            pricePln: priceListed ? (p.pricePln || p.price || "") : "",
+            priceEur: priceListed ? (p.priceEur || "") : "",
+            pricePlnCurrency: p.pricePlnCurrency || "PLN",
+            priceEurCurrency: p.priceEurCurrency || "EUR",
+            priceListed,
+          };
+        }),
       );
       return productCache;
     });

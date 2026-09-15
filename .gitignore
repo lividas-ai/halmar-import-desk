@@ -12,7 +12,9 @@ screenshots
 .env
 .env.*
 .vercel
-.grok
+.grok/*
+!.grok/app-env.json
 data/*.xml
 AGENTS.md
 AGENTS.project.md
+.env*.local

@@ -20,6 +20,7 @@ import {
 import { renderInstallPage } from "./grok-pwa-plugin.mjs";
 
 const TEMPLATE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const EMPTY_ASSET_ROOT = mkdtempSync(join(tmpdir(), "grok-pwa-empty-"));
 
 test("injects before </head>", () => {
   const out = injectGrokPwaHead("<html><head><title>x</title></head><body></body></html>");
@@ -306,6 +307,7 @@ test("emits og:image for a public host and prefers a custom card", () => {
   const placeholder = injectGrokPwaHead("<html><head></head></html>", {
     appName: "Wild Race",
     host: "wild-race.grok.me",
+    cwd: EMPTY_ASSET_ROOT,
     site: { title: "Wild Race" },
   });
   assert.match(
@@ -317,6 +319,7 @@ test("emits og:image for a public host and prefers a custom card", () => {
   const custom = injectGrokPwaHead("<html><head></head></html>", {
     appName: "Wild Race",
     host: "wild-race.grok.me",
+    cwd: EMPTY_ASSET_ROOT,
     site: { title: "Wild Race", card: "custom", type: "x:game" },
   });
   assert.match(custom, /property="og:image" content="https:\/\/wild-race\.grok\.me\/og\.jpg"/);
@@ -326,6 +329,7 @@ test("emits og:image for a public host and prefers a custom card", () => {
 test("placeholder og:image appends site.color when it is 6-digit hex", () => {
   const themed = injectGrokPwaHead("<html><head></head></html>", {
     host: "wild-race.grok.me",
+    cwd: EMPTY_ASSET_ROOT,
     site: { title: "Wild Race", color: "#FF4D2E" },
   });
   assert.match(
@@ -335,12 +339,14 @@ test("placeholder og:image appends site.color when it is 6-digit hex", () => {
 
   const invalid = injectGrokPwaHead("<html><head></head></html>", {
     host: "wild-race.grok.me",
+    cwd: EMPTY_ASSET_ROOT,
     site: { title: "Wild Race", color: "red" },
   });
   assert.doesNotMatch(invalid, /color=/);
 
   const custom = injectGrokPwaHead("<html><head></head></html>", {
     host: "wild-race.grok.me",
+    cwd: EMPTY_ASSET_ROOT,
     site: { title: "Wild Race", card: "custom", color: "FF4D2E" },
   });
   assert.doesNotMatch(custom, /color=/);
@@ -503,4 +509,3 @@ test("vite plugin bakes og identity as a virtual module", () => {
   assert.match(plugin, /virtual:grok-og-identity/);
   assert.match(plugin, /snapshotOgIdentity/);
 });
-

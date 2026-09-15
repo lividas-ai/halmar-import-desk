@@ -13,12 +13,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { products } = useCatalog();
   const hydrate = useDesk((s) => s.hydrate);
   const hydrated = useDesk((s) => s.hydrated);
+  const deskToken = useDesk((s) => s.deskToken);
   const decisions = useDesk((s) => s.decisions);
   const updatedAt = useDesk((s) => s.updatedAt);
   const backupFile = useDesk((s) => s.backupFile);
+  const localStatus = useDesk((s) => s.localStatus);
+  const localError = useDesk((s) => s.localError);
+  const cloudStatus = useDesk((s) => s.cloudStatus);
+  const cloudError = useDesk((s) => s.cloudError);
+  const cloudDirty = useDesk((s) => s.cloudDirty);
+  const serverRevision = useDesk((s) => s.serverRevision);
   const exportDecisions = useDesk((s) => s.exportDecisions);
   const importSnapshot = useDesk((s) => s.importSnapshot);
   const connectBackupFile = useDesk((s) => s.connectBackupFile);
+  const shareUrl = useDesk((s) => s.shareUrl);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -26,21 +34,30 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [hydrate]);
 
   useEffect(() => {
-    const flush = () => {
-      /* persist already wrote on every mark; this keeps the tab-close path warm */
+    if (!hydrated || !deskToken) return;
+    const expected = `desk=${deskToken}`;
+    if (window.location.hash.slice(1) === expected) return;
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${window.location.search}#${expected}`,
+    );
+  }, [deskToken, hydrated]);
+
+  useEffect(() => {
+    const warnIfUnsaved = (event: BeforeUnloadEvent) => {
+      if (!cloudDirty && localStatus !== "saving" && localStatus !== "error") return;
+      event.preventDefault();
     };
-    window.addEventListener("pagehide", flush);
-    document.addEventListener("visibilitychange", flush);
-    return () => {
-      window.removeEventListener("pagehide", flush);
-      document.removeEventListener("visibilitychange", flush);
-    };
-  }, []);
+    window.addEventListener("beforeunload", warnIfUnsaved);
+    return () => window.removeEventListener("beforeunload", warnIfUnsaved);
+  }, [cloudDirty, localStatus]);
 
   const total = products?.length ?? TOTAL_PRODUCTS;
   const marked = Object.keys(decisions).length;
   const imported = Object.values(decisions).filter((d) => d === "import").length;
   const skipped = Object.values(decisions).filter((d) => d === "reject").length;
+  const deskHash = deskToken ? `desk=${deskToken}` : undefined;
 
   function onFile(file: File | undefined) {
     if (!file) return;
@@ -69,12 +86,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       return;
     }
     exportDecisions(products, "manual");
-    toast.success("Full catalog + all marks downloaded. Send this JSON file back.");
+    toast.success("Verified progress backup downloaded. The final file is created on the Chosen page.");
   }
 
   async function lockFile() {
     const res = await connectBackupFile();
-    if (res.ok) toast.success(`Live backup locked: ${res.name}. Every mark writes to this file.`);
+    if (res.ok) toast.success(`Live backup connected: ${res.name}. Every mark writes to this file.`);
     else toast.error(res.error);
   }
 
@@ -85,6 +102,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link
             to="/work"
             search={{ category: "all", page: 1, q: "" }}
+            hash={deskHash}
             className="font-display text-lg tracking-tight"
           >
             Halmar Import Desk
@@ -93,6 +111,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               to="/work"
               search={{ category: "all", page: 1, q: "" }}
+              hash={deskHash}
               className="rounded-md px-3 py-2 text-muted hover:bg-bg hover:text-fg"
             >
               <span className="inline-flex items-center gap-1">
@@ -102,12 +121,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               to="/work"
               search={{ category: "all", page: 1, q: "" }}
+              hash={deskHash}
               className="rounded-md px-3 py-2 text-muted hover:bg-bg hover:text-fg"
             >
               Review pages
             </Link>
             <Link
               to="/review"
+              hash={deskHash}
               className="rounded-md px-3 py-2 text-muted hover:bg-bg hover:text-fg"
             >
               <span className="inline-flex items-center gap-1">
@@ -123,7 +144,26 @@ export function AppShell({ children }: { children: ReactNode }) {
                     {marked}/{total}
                   </span>{" "}
                   marked · {imported} import · {skipped} skip
-                  <span className="hidden sm:inline"> · saved {formatClock(updatedAt)}</span>
+                  <span className="hidden sm:inline">
+                    {localStatus === "saving"
+                      ? " · saving locally…"
+                      : localStatus === "error"
+                        ? " · local save problem"
+                        : ` · local ${formatClock(updatedAt)}`}
+                  </span>
+                  <span
+                    className={
+                      cloudStatus === "error" ? "text-reject" : cloudDirty ? "text-warn" : ""
+                    }
+                  >
+                    {cloudStatus === "syncing"
+                      ? " · cloud saving…"
+                      : serverRevision > 0
+                        ? ` · cloud r${serverRevision}${cloudDirty ? " · changes pending" : ""}`
+                        : cloudStatus === "error"
+                          ? " · cloud problem"
+                          : ` · cloud ready${cloudDirty ? " · changes pending" : ""}`}
+                  </span>
                   {backupFile ? (
                     <span className="hidden md:inline"> · disk {backupFile}</span>
                   ) : null}
@@ -145,8 +185,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button
               variant="secondary"
               size="sm"
+              disabled={!hydrated}
               onClick={async () => {
-                const url = window.location.origin + "/";
+                const url = shareUrl();
                 try {
                   await navigator.clipboard.writeText(url);
                   toast.success("Desk link copied. Send this URL to your client.");
@@ -172,7 +213,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
             <Button size="sm" onClick={downloadNow}>
               <Download className="size-4" />
-              Download save
+              Download backup
             </Button>
           </div>
         </div>
@@ -182,6 +223,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             style={{ width: `${Math.min(100, (marked / total) * 100)}%` }}
           />
         </div>
+        {localError || cloudError ? (
+          <div className="border-t border-reject/30 bg-reject-soft px-4 py-2 text-center text-sm text-reject">
+            <strong>
+              {localStatus === "error" || cloudStatus === "error"
+                ? "Save protection needs attention."
+                : "One backup layer needs attention."}
+            </strong>{" "}
+            {[localError, cloudError].filter(Boolean).join(" · ")}
+          </div>
+        ) : null}
       </header>
       {children}
     </div>
