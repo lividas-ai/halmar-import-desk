@@ -75,6 +75,27 @@ function Home() {
           </p>
         ) : null}
 
+        <section className="mt-8 max-w-3xl rounded-xl border border-primary/30 bg-surface p-5">
+          <h2 className="font-display text-xl">How to send this desk to your client</h2>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed">
+            <li>
+              Click <strong>Copy desk link</strong> in the top bar and send that URL (WhatsApp, email).
+            </li>
+            <li>
+              Tell them: open the link on a computer in Chrome, click <strong>Lock backup file</strong>{" "}
+              once, then mark every product <strong>1 Import</strong> or <strong>2 Skip</strong>.
+            </li>
+            <li>
+              When they finish (or pause), they click <strong>Download save</strong> and email you that
+              JSON file.
+            </li>
+            <li>
+              You click <strong>Restore</strong> and load their file. That JSON is also what you give
+              Claude with the Halmar XML — match <code>eanGtin</code> to XML <code>ean_GTIN</code>.
+            </li>
+          </ol>
+        </section>
+
         <section className="mt-8 grid gap-6 rounded-xl border border-border bg-surface p-5 md:grid-cols-2">
           <div className="space-y-3">
             <label className="block text-sm font-medium">
